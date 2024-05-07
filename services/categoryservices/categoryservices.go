@@ -6,7 +6,7 @@ import (
 )
 
 func GetAll() []entities.Category {
-	rows, err := config.DB.Query(`select * from categories`)
+	rows, err := config.DB.Query(`SELECT * FROM categories`)
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +20,26 @@ func GetAll() []entities.Category {
 		if err := rows.Scan(&category.Id, &category.Name, &category.CreatedAt, &category.UpdatedAt); err != nil {
 			panic(err)
 		}
+
+		categories = append(categories, category)
 	}
 
 	return categories
+}
+
+func Create(category entities.Category) bool {
+	result, err := config.DB.Exec(
+		`insert into categories (name, created_at, updated_at) value (?,?,?)`,
+		category.Name, category.CreatedAt, category.UpdatedAt,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	lastInsertId, err := result.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+
+	return lastInsertId > 0
 }
