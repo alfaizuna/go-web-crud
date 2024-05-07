@@ -43,3 +43,29 @@ func Create(category entities.Category) bool {
 
 	return lastInsertId > 0
 }
+
+func Detail(id int) entities.Category {
+	var category entities.Category
+	row := config.DB.QueryRow(`select * from categories where id = ?`, id)
+	if err := row.Scan(&category.Id, &category.Name, &category.CreatedAt, &category.UpdatedAt); err != nil {
+		panic(err)
+	}
+	return category
+}
+
+func Update(id int, category entities.Category) bool {
+	query, err := config.DB.Exec(`update categories set name = ?, updated_at = ? where id = ?`, category.Name, category.UpdatedAt, id)
+	if err != nil {
+		panic(err)
+	}
+	result, err := query.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	return result > 0
+}
+
+func Delete(id int) error {
+	_, err := config.DB.Exec(`delete from categories where id = ?`, id)
+	return err
+}
